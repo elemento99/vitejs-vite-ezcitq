@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ritmos Aleatorios con Tone.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.40/Tone.min.js"></script>
+  </head>
+  <body>
+    <label for="noteCount">Selecciona la cantidad de notas (n): </label>
+    <input type="number" id="noteCount" min="1" max="10" value="4" />
+    <button id="generateButton">Generar Ritmo</button>
+    <button id="loopRhythmButton">Reproducir Ritmo en Bucle</button>
+    <div id="buttons-container"></div>
+    <label for="bpmInput">BPM: </label>
+    <input type="number" id="bpmInput" min="30" max="300" value="120" />
+    <button id="setBpmButton">Establecer BPM</button>
+    <button id="stopButton">Detener Sonidos</button>
+    <label for="key">Selecciona una tonalidad: </label>
+    <select id="key">
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+    </select>
+    <button id="playCadenceButton">Reproducir Cadencia</button>
+
+    <button id="toggleNotasButton">Ocultar Notas</button>
+<div id="notasContainer" style="display: block;"></div>
+
+    <script type="module" src="/app/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ritmos Aleatorios con Tone.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.40/Tone.min.js"></script>
+  </head>
+  <body>
+    <label for="noteCount">Selecciona la cantidad de notas (n): </label>
+    <input type="number" id="noteCount" min="1" max="10" value="4" />
+    <button id="generateButton">Generar Ritmo</button>
+    <button id="loopRhythmButton">Reproducir Ritmo en Bucle</button>
+
+    <div id="buttons-container"></div>
+
+    <label for="bpmInput">BPM: </label>
+    <input type="number" id="bpmInput" min="30" max="300" value="120" />
+    <button id="setBpmButton">Establecer BPM</button>
+
+    <!-- Botón para detener todos los sonidos -->
+    <button id="stopButton">Detener Sonidos</button>
+
+    <!-- Selector de tonalidad -->
+    <label for="key">Selecciona una tonalidad: </label>
+    <select id="key">
+      <option value="C">C</option>
+      <option value="D">D</option>
+      <option value="E">E</option>
+      <option value="F">F</option>
+      <option value="G">G</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+    </select>
+
+    <!-- Botón para reproducir la cadencia -->
+    <button id="playCadenceButton">Reproducir Cadencia</button>
+
+    <script>
+      const todasLasNotas = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'];
+      const duraciones = ['8n', '4n', '16n', '2n'];
+      Tone.Transport.bpm.value = 120;
+
+      const sampler = new Tone.Sampler({
+        urls: {
+          A0: 'A0.mp3',
+          C1: 'C1.mp3',
+          'D#1': 'Ds1.mp3',
+          'F#1': 'Fs1.mp3',
+          A1: 'A1.mp3',
+          C2: 'C2.mp3',
+          'D#2': 'Ds2.mp3',
+          'F#2': 'Fs2.mp3',
+          A2: 'A2.mp3',
+          C3: 'C3.mp3',
+          'D#3': 'Ds3.mp3',
+          'F#3': 'Fs3.mp3',
+          A3: 'A3.mp3',
+          C4: 'C4.mp3',
+          'D#4': 'Ds4.mp3',
+          'F#4': 'Fs4.mp3',
+          A4: 'A4.mp3',
+          C5: 'C5.mp3',
+          'D#5': 'Ds5.mp3',
+          'F#5': 'Fs5.mp3',
+          A5: 'A5.mp3',
+          C6: 'C6.mp3',
+          'D#6': 'Ds6.mp3',
+          'F#6': 'Fs6.mp3',
+          A6: 'A6.mp3',
+          C7: 'C7.mp3',
+          'D#7': 'Ds7.mp3',
+          'F#7': 'Fs7.mp3',
+          A7: 'A7.mp3',
+          C8: 'C8.mp3',
+        },
+        release: 1,
+        baseUrl: 'https://tonejs.github.io/audio/salamander/',
+      }).toDestination();
+
+      function generarNotasAleatorias(n) {
+        return Array.from(
+          { length: n },
+          () => todasLasNotas[Math.floor(Math.random() * todasLasNotas.length)]
+        );
+      }
+
+      function generarRitmoAleatorio(n) {
+        return Array.from(
+          { length: n },
+          () => duraciones[Math.floor(Math.random() * duraciones.length)]
+        );
+      }
+
+      function generarCombinaciones(notas, ritmo) {
+        return notas.map((nota, i) => ({ nota, duracion: ritmo[i] }));
+      }
+
+      function reproducirCombinacion(combinacion) {
+        let tiempoInicio = 0;
+        combinacion.forEach(({ nota, duracion }) => {
+          sampler.triggerAttackRelease(
+            nota,
+            duracion,
+            Tone.now() + tiempoInicio
+          );
+          tiempoInicio += Tone.Time(duracion).toSeconds();
+        });
+      }
+
+      // Evento del botón Generar Ritmo
+      document.getElementById('generateButton').onclick = async () => {
+        const n = parseInt(document.getElementById('noteCount').value, 10);
+        const notas = generarNotasAleatorias(n);
+        const ritmo = generarRitmoAleatorio(n);
+        const combinacion = generarCombinaciones(notas, ritmo);
+
+        // Asegurarse de que Tone.js está inicializado
+        await Tone.start();
+
+        // Reproducir la combinación generada
+        reproducirCombinacion(combinacion);
+
+        console.log('Combinación generada:', combinacion);
+      };
+
+      document.getElementById('setBpmButton').onclick = () => {
+        const bpm = parseInt(document.getElementById('bpmInput').value, 10);
+        Tone.Transport.bpm.value = bpm;
+      };
+
+      document.getElementById('stopButton').onclick = () => {
+        Tone.Transport.stop();
+        Tone.Transport.cancel();
+      };
+
+      document.getElementById('playCadenceButton').onclick = async () => {
+        const key = document.getElementById('key').value;
+        const chords = getCadence(key);
+
+        await Tone.start();
+
+        let time = 0;
+        chords.forEach((chord) => {
+          sampler.triggerAttackRelease(chord, '8n', `+${time}`);
+          time += 1;
+        });
+      };
+
+      function getCadence(key) {
+        const notes = {
+          C: ['C4', 'E4', 'G4'],
+          D: ['D4', 'F#4', 'A4'],
+          E: ['E4', 'G#4', 'B4'],
+          F: ['F4', 'A4', 'C5'],
+          G: ['G4', 'B4', 'D5'],
+          A: ['A4', 'C#5', 'E5'],
+          B: ['B4', 'D#5', 'F#5'],
+        };
+
+        const root = notes[key];
+        const fourth =
+          notes[Object.keys(notes)[(Object.keys(notes).indexOf(key) + 3) % 7]];
+        const fifth =
+          notes[Object.keys(notes)[(Object.keys(notes).indexOf(key) + 4) % 7]];
+
+        return [root, fourth, fifth, root];
+      }
+
+      let currentLoop = null; // Variable para almacenar el bucle generado
+
+      document.getElementById('loopRhythmButton').onclick = async () => {
+        const n = parseInt(document.getElementById('noteCount').value, 10);
+        const notas = generarNotasAleatorias(n);
+        const ritmo = generarRitmoAleatorio(n);
+        const combinacion = generarCombinaciones(notas, ritmo);
+
+        // Asegúrate de que Tone.js está inicializado
+        await Tone.start();
+
+        // Detén cualquier loop previo
+        if (currentLoop) {
+          currentLoop.dispose();
+        }
+
+        // Define el loop
+        currentLoop = new Tone.Loop((time) => {
+          combinacion.forEach(({ nota, duracion }, i) => {
+            sampler.triggerAttackRelease(
+              nota,
+              duracion,
+              time + i * Tone.Time(duracion).toSeconds()
+            );
+          });
+        }, '1m'); // Longitud del loop (1 compás)
+
+        // Inicia el transporte y el loop
+        Tone.Transport.start();
+        currentLoop.start(0);
+
+        console.log('Ritmo en bucle:', combinacion);
+      };
+    </script>
+  </body>
+</html>
